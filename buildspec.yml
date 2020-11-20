@@ -1,0 +1,15 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      docker: 18
+  build:
+    commands:
+      - bundle exec rspec --format RspecJunitFormatter --out result/report.xml
+reports:
+  rspec_reports:
+    files:
+      - report.xml
+    base-directory: result
+    file-format: JunitXml
