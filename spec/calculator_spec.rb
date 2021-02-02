@@ -13,4 +13,10 @@ RSpec.describe Calculator do
       expect(described_class.sub(2, 1)).to eq 1
     end
   end
+
+  describe "pow" do
+    it "should return 1 when given 2 and 3" do
+      expect(described_class.pow(2, 3)).to eq 1
+    end
+  end
 end

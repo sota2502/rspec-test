@@ -7,5 +7,9 @@ class Calculator
     def sub(a, b)
       a - b
     end
+
+    def pow(a, b)
+      a ** b
+    end
   end
 end
