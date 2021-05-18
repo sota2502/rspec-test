@@ -15,7 +15,6 @@ on:
 
 jobs:
   test:
-
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -36,3 +35,13 @@ jobs:
         gem install bundler:2.0.2
         bundle install --path vendor/bundle --quiet --jobs 4 --retry 3
         bundle exec rspec
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Run commands
+      env:
+        WEBHOOK_URL: ${{secrets.WEBHOOK_URL}}
+        GITHUB_CONTEXT: ${{ toJSON(github) }}
+      run: |
+        echo $GITHUB_CONTEXT
+        curl -X POST -H 'Content-type: application/json' --data "{'text':'$GITHUB_CONTEXT'}" "$WEBHOOK_URL"
