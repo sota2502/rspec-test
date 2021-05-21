@@ -9,30 +9,58 @@ name: Ruby
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
+      - release
   pull_request:
-    branches: [ master ]
+    branches:
+      - master
+      - release
 
 jobs:
   test:
-
     runs-on: ubuntu-latest
     strategy:
       matrix:
         ruby-version: ['2.6']
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Ruby
-    # To automatically get bug fixes and new Ruby versions for ruby/setup-ruby,
-    # change this to (see https://github.com/ruby/setup-ruby#versioning):
-    # uses: ruby/setup-ruby@v1
-      uses: ruby/setup-ruby@473e4d8fe5dd94ee328fdfca9f8c9c7afc9dae5e
-      with:
-        ruby-version: ${{ matrix.ruby-version }}
-        bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-    - name: Run tests
-      run: |
-        gem install bundler:2.0.2
-        bundle install --path vendor/bundle --quiet --jobs 4 --retry 3
-        bundle exec rspec
+      - uses: actions/checkout@v2
+      - name: Set up Ruby
+      # To automatically get bug fixes and new Ruby versions for ruby/setup-ruby,
+      # change this to (see https://github.com/ruby/setup-ruby#versioning):
+      # uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@473e4d8fe5dd94ee328fdfca9f8c9c7afc9dae5e
+        with:
+          ruby-version: ${{ matrix.ruby-version }}
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+      - name: Run tests
+        run: |
+          gem install bundler:2.0.2
+          bundle install --path vendor/bundle --quiet --jobs 4 --retry 3
+          bundle exec rspec
+  notify:
+    if: github.ref == 'refs/heads/release'
+    needs:
+      - test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run commands
+        env:
+          WEBHOOK_URL: ${{secrets.WEBHOOK_URL}}
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
+          WITH_A: ${{ contains(github.event.pull_request.body, '--with-a') }}
+          WITH_B: ${{ contains(github.event.pull_request.body, '--with-b') }}
+          BUGFIX: ${{ contains(github.event.pull_request.labels.*.name, 'bug') }}
+        run: |
+          echo $GITHUB_CONTEXT
+          printenv
+          curl -s -X POST -H 'Content-type: application/json' --data "{'text':'$GITHUB_CONTEXT'}" "$WEBHOOK_URL"
+          option=
+          if [ "$WITH_A" = "true" ]; then
+            option="$option --with-a"
+          fi
+          if [ "$WITH_B" = "true" ] ; then
+            option="$option --with-b"
+          fi
+          echo option:$option
