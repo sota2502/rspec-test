@@ -52,13 +52,12 @@ jobs:
           RUNNER_CONTEXT: ${{ toJSON(runner) }}
           WITH_HOGE: ${{ contains(github.event.commits.*.message, 'hoge') }}
           WITH_FUGA: ${{ contains(github.event.commits.*.message, 'fuga') }}
-          WITH_HOGEFUGA: ${{ startsWith(github.event.commits.*.message, 'HOGE') && contains(github.event.commits.*.message, 'FUGA') }}
+          WITH_HOGEFUGA: ${{ contains(github.event.commits.*.message, 'HOGE') && contains(github.event.commits.*.message, 'BAR') }}
           WITH_A: ${{ contains(github.event.pull_request.body, '--with-a') }}
           WITH_B: ${{ contains(github.event.pull_request.body, '--with-b') }}
           BUGFIX: ${{ contains(github.event.pull_request.labels.*.name, 'bug') }}
         run: |
           echo $GITHUB_CONTEXT
-          echo ${{ github.event.commits }}
           printenv
           # curl -s -X POST -H 'Content-type: application/json' --data "{'text':'$GITHUB_CONTEXT'}" "$WEBHOOK_URL"
           option=
