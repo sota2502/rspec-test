@@ -71,6 +71,6 @@ jobs:
           echo option:$option
           migration=$(echo '${{ toJSON(github) }}' | jq '.event.commits[].message | select( . | contains("[release]") and contains("[migration]"))')
           echo $migration
-          if [ $migration ]; then
+          if [ -n "$migration" ]; then
             echo "do migration"
           fi
