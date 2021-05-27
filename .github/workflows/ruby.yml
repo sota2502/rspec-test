@@ -40,22 +40,26 @@ jobs:
           bundle install --path vendor/bundle --quiet --jobs 4 --retry 3
           bundle exec rspec
   notify:
-    if: github.ref == 'refs/heads/release'
-    needs:
-      - test
+    #if: github.ref == 'refs/heads/release'
+    #needs:
+    #  - test
     runs-on: ubuntu-latest
     steps:
       - name: Run commands
         env:
           WEBHOOK_URL: ${{secrets.WEBHOOK_URL}}
           GITHUB_CONTEXT: ${{ toJSON(github) }}
+          STEPS_CONTEXT: ${{ toJSON(steps) }}
+          ENV_CONTEXT: ${{ toJSON(env) }}
+          JOB_CONTEXT: ${{ toJSON(job) }}
+          RUNNER_CONTEXT: ${{ toJSON(runner) }}
           WITH_A: ${{ contains(github.event.pull_request.body, '--with-a') }}
           WITH_B: ${{ contains(github.event.pull_request.body, '--with-b') }}
           BUGFIX: ${{ contains(github.event.pull_request.labels.*.name, 'bug') }}
         run: |
           echo $GITHUB_CONTEXT
           printenv
-          curl -s -X POST -H 'Content-type: application/json' --data "{'text':'$GITHUB_CONTEXT'}" "$WEBHOOK_URL"
+          # curl -s -X POST -H 'Content-type: application/json' --data "{'text':'$GITHUB_CONTEXT'}" "$WEBHOOK_URL"
           option=
           if [ "$WITH_A" = "true" ]; then
             option="$option --with-a"
