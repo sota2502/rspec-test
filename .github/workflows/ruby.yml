@@ -41,7 +41,7 @@ jobs:
           bundle install --path vendor/bundle --quiet --jobs 4 --retry 3
           bundle exec rspec
   notify:
-    # if: github.ref == 'refs/heads/release' || github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/release' || github.ref == 'refs/heads/master'
     needs:
       - test
     runs-on: ubuntu-latest
