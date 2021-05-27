@@ -40,7 +40,7 @@ jobs:
           bundle install --path vendor/bundle --quiet --jobs 4 --retry 3
           bundle exec rspec
   notify:
-    if: github.ref == 'refs/heads/release'
+    if: github.ref == 'refs/heads/release' || github.ref == 'refs/heads/master'
     needs:
       - test
     runs-on: ubuntu-latest
@@ -49,13 +49,17 @@ jobs:
         env:
           WEBHOOK_URL: ${{secrets.WEBHOOK_URL}}
           GITHUB_CONTEXT: ${{ toJSON(github) }}
+          RUNNER_CONTEXT: ${{ toJSON(runner) }}
+          WITH_HOGE: ${{ contains(github.event.commits.*.message, 'hoge') }}
+          WITH_FUGA: ${{ contains(github.event.commits.*.message, 'fuga') }}
+          MIGRATION: ${{ contains(github.event.commits.*.message, '[release]') && contains(github.event.commits.*.message, '[migration]') }}
           WITH_A: ${{ contains(github.event.pull_request.body, '--with-a') }}
           WITH_B: ${{ contains(github.event.pull_request.body, '--with-b') }}
           BUGFIX: ${{ contains(github.event.pull_request.labels.*.name, 'bug') }}
         run: |
           echo $GITHUB_CONTEXT
           printenv
-          curl -s -X POST -H 'Content-type: application/json' --data "{'text':'$GITHUB_CONTEXT'}" "$WEBHOOK_URL"
+          # curl -s -X POST -H 'Content-type: application/json' --data "{'text':'$GITHUB_CONTEXT'}" "$WEBHOOK_URL"
           option=
           if [ "$WITH_A" = "true" ]; then
             option="$option --with-a"
